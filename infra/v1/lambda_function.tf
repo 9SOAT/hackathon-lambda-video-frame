@@ -12,7 +12,7 @@ resource "aws_lambda_function" "processor" {
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
   timeout          = var.lambda_timeout
   memory_size      = var.lambda_memory
-  #layers           = [aws_lambda_layer_version.ffmpeg.arn]
+  layers           = ["arn:aws:lambda:us-east-1:897722698720:layer:ffmpeg:1"]
   environment {
     variables = {
       INPUT_BUCKET  = aws_s3_bucket.input.bucket

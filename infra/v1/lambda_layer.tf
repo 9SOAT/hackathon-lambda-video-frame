@@ -1,7 +1,7 @@
 # data "archive_file" "ffmpeg_zip" {
 #   type        = "zip"
-#   source_file = "${path.module}/../build/ffmpeg-layer.zip"  
-#   output_path = "${path.module}/../build/ffmpeg-layer.zip"   
+#   source_file = "${path.module}/../../lambda/ffmpeg"  
+#   output_path = "${path.module}/../../lambda/ffmpeg"   
 # }
 
 
