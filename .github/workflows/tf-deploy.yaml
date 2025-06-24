@@ -1,11 +1,21 @@
-name: Deploy Lambda
+name: CI/CD Terraform & Lambda Deploy
 
 on:
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [opened, synchronize, reopened]
+    paths:
+      - "infra/**"
+      - "lambda/**"
+      - "lambda-layer/**"
+      - "Makefile"
   push:
     branches:
       - main
+    paths:
+      - "infra/**"
+      - "lambda/**"
+      - "lambda-layer/**"
+      - "Makefile"
 
 jobs:
   build-and-deploy:
@@ -16,19 +26,19 @@ jobs:
       contents: read
 
     env:
-      AWS_REGION: us-east-1
+      AWS_REGION: ${{ secrets.AWS_REGION }}
 
     steps:
-      - name: Checkout do código
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{secrets.AWS_ROLE}}
-          aws-region: ${{secrets.AWS_REGION}}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region:    ${{ env.AWS_REGION }}
 
-      - name: Set up Python (for zip tasks)
+      - name: Set up Python 3.9
         uses: actions/setup-python@v5
         with:
           python-version: "3.9"
@@ -37,19 +47,23 @@ jobs:
         run: |
           make build-lambda
 
-      - name: Configurar Terraform
-        uses: hashicorp/setup-terraform@v2
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.10.5
+          terraform_version: 1.6.6
 
-      - name: Inicializar Terraform
+      - name: Terraform Init
+        working-directory: infra/v1
+        run: terraform init -reconfigure
+
+      - name: Terraform Validate & Plan
+        if: github.event_name == 'pull_request'
+        working-directory: infra/v1
         run: |
-          cd terraform
-          terraform init -reconfigure
+          terraform validate
+          terraform plan -no-color
 
-      - name: Aplicar Terraform (Deploy Lambda)
-        id: apply
+      - name: Terraform Apply
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          cd terraform
-          terraform apply -auto-approve
+        working-directory: infra/v1
+        run: terraform apply -auto-approve
