@@ -1,42 +1,32 @@
-name: CI/CD Terraform & Lambda Deploy
-permissions:
-  id-token: write
-  contents: read
+name: Deploy Python Lambda
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - "infra/**"
-      - "lambda/**"
-      - "lambda-layer/**"
-      - "Makefile"
   push:
     branches:
       - main
-    paths:
-      - "infra/**"
-      - "lambda/**"
-      - "lambda-layer/**"
-      - "Makefile"
-      
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-
+    permissions:
+      id-token: write
+      contents: read
 
     env:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_REGION: us-east-1
 
     steps:
-      - name: Checkout code
+      - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: Configurar AWS credenciais via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region:    ${{ secrets.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
