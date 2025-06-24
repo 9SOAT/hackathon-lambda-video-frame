@@ -22,11 +22,11 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Configurar AWS credenciais via OIDC
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{secrets.AWS_ROLE}}
+          aws-region: ${{secrets.AWS_REGION}}
 
       - name: Set up Python (for zip tasks)
         uses: actions/setup-python@v5
