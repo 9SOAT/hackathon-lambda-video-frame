@@ -36,7 +36,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region:    ${{ env.AWS_REGION }}
+          aws-region:    ${{ secrets.AWS_REGION }}
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
